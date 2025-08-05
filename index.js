@@ -1,23 +1,30 @@
 const express = require("express");
 const cors = require("cors");
+const admin = require("firebase-admin");
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
 // Firebase Admin SDK setup
-const admin = require("firebase-admin");
-const serviceAccount = require("./firebase-key.json");
+try {
+  const serviceAccount = require("./firebase-key.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+
+  console.log("✅ Firebase Admin initialized");
+} catch (error) {
+  console.error("❌ Firebase initialization failed:", error);
+}
 
 const db = admin.firestore();
 
-// Example route
+// Health check route for Render
 app.get("/", (req, res) => {
-  res.send("Backend is running!");
+  res.send("✅ Backend is running!");
 });
 
 // Example: Get all users from Firestore
@@ -33,13 +40,13 @@ app.get("/users", async (req, res) => {
 
     res.status(200).json(users);
   } catch (error) {
-    console.error("Error getting users:", error);
+    console.error("❌ Error getting users:", error);
     res.status(500).send("Internal Server Error");
   }
 });
 
-// Dynamic port for Render
+// Dynamic port for Render deployment
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
